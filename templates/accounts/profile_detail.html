@@ -1,27 +1,31 @@
 {% extends 'base.html' %}
 {% block title %}My Profile · SkillSwap{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-  <div class="flex items-center gap-4">
-    <img src="{% if user_obj.avatar %}{{ user_obj.avatar.url }}{% endif %}" class="h-16 w-16 rounded-full object-cover border" alt="avatar" />
-    <div>
-      <h1 class="text-xl font-semibold">{{ user_obj.get_full_name|default:user_obj.username }}</h1>
-      <p class="text-sm text-gray-600">Баллы: <span class="font-medium">{{ user_obj.points }}</span></p>
-      <a class="text-blue-600 text-sm" href="{% url 'accounts:profile_edit' %}">Редактировать профиль</a>
+<div class="container" style="max-width:940px;">
+  <div class="card">
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <img src="{% if user_obj.avatar %}{{ user_obj.avatar.url }}{% endif %}" style="height:64px;width:64px;border-radius:999px;object-fit:cover;border:1px solid var(--outline);" alt="avatar" />
+      <div>
+        <h1 class="text-xl font-semibold">{{ user_obj.get_full_name|default:user_obj.username }}</h1>
+        <p class="muted">Баллы: <span style="color:#fff;font-weight:600;">{{ user_obj.points }}</span></p>
+        <a class="btn btn-ghost" href="{% url 'accounts:profile_edit' %}">Редактировать профиль</a>
+      </div>
     </div>
   </div>
-  <hr class="my-6" />
-  <h2 class="font-semibold mb-2">История обменов (скелет)</h2>
-  <ul class="space-y-2">
-    {% for ex in recent_exchanges %}
-      <li class="text-sm">
-        <span class="font-medium">{{ ex.skill.name }}</span> — {{ ex.sender }} ↔ {{ ex.receiver }}
-        <span class="ml-2 px-2 py-0.5 rounded bg-gray-100">{{ ex.status }}</span>
-      </li>
-    {% empty %}
-      <li class="text-sm text-gray-600">Пока нет операций</li>
-    {% endfor %}
-  </ul>
+
+  <div class="card" style="margin-top:1rem;">
+    <h2 class="font-semibold mb-2">История обменов (скелет)</h2>
+    <ul style="display:grid;gap:.5rem;">
+      {% for ex in recent_exchanges %}
+        <li class="muted">
+          <span style="color:#fff;font-weight:600;">{{ ex.skill.name }}</span> — {{ ex.sender }} ↔ {{ ex.receiver }}
+          <span class="btn btn-outline" style="padding:.1rem .5rem;border-radius:999px;">{{ ex.status }}</span>
+        </li>
+      {% empty %}
+        <li class="muted">Пока нет операций</li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
 {% endblock %}
 

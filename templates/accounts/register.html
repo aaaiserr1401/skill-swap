@@ -1,43 +1,25 @@
 {% extends 'base.html' %}
 {% block title %}Register · SkillSwap{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
-  <h1 class="text-xl font-semibold mb-4">Create your account</h1>
-  <form method="post" enctype="multipart/form-data" class="space-y-4">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div>
-      <label class="block text-sm">Username</label>
-      {{ form.username }}
-    </div>
-    <div>
-      <label class="block text-sm">Email</label>
-      {{ form.email }}
-    </div>
-    <div>
-      <label class="block text-sm">Full name</label>
-      {{ form.full_name }}
-    </div>
-    <div>
-      <label class="block text-sm">University</label>
-      {{ form.university }}
-    </div>
-    <div>
-      <label class="block text-sm">Avatar</label>
-      {{ form.avatar }}
-    </div>
-    <div>
-      <label class="block text-sm">Password</label>
-      {{ form.password1 }}
-    </div>
-    <div>
-      <label class="block text-sm">Confirm Password</label>
-      {{ form.password2 }}
-    </div>
-    <button class="w-full bg-blue-600 text-white py-2 rounded">Create account</button>
-  </form>
-  <p class="text-sm mt-4">Have an account? <a class="text-blue-600" href="{% url 'accounts:login' %}">Login</a></p>
-  <p class="text-sm mt-2"><a class="text-blue-600" href="{% url 'home' %}">Back to home</a></p>
+<div class="container" style="max-width:720px;">
+  <div class="card">
+    <h1 class="text-xl font-semibold mb-4">Создать аккаунт</h1>
+    <form method="post" enctype="multipart/form-data" class="form-grid">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="form-group"><label>Логин</label>{{ form.username }}</div>
+      <div class="form-group"><label>Email</label>{{ form.email }}</div>
+      <div class="form-group"><label>Полное имя</label>{{ form.full_name }}</div>
+      <div class="form-group"><label>Университет</label>{{ form.university }}</div>
+      <div class="form-group"><label>Аватар</label>{{ form.avatar }}</div>
+      <div class="form-group"><label>Пароль</label>{{ form.password1 }}</div>
+      <div class="form-group"><label>Подтверждение пароля</label>{{ form.password2 }}</div>
+      <div class="form-actions">
+        <button class="btn btn-primary">Создать аккаунт</button>
+        <a class="btn btn-ghost" href="{% url 'accounts:login' %}">Войти</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
 

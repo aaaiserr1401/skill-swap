@@ -4,29 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}SkillSwap{% endblock %}</title>
-    <!-- Tailwind via CDN for quick start; later replace with django-tailwind build -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    {% block head %}{% endblock %}
     {% load static %}
+    <!-- Optional Tailwind for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom modern theme -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-900">
-    <nav class="bg-white border-b">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="font-semibold">SkillSwap</a>
-            <div class="space-x-4">
+<body class="theme min-h-screen">
+    <nav class="navbar">
+        <div class="container nav-inner">
+            <a href="/" class="brand">SkillSwap</a>
+            <div class="nav-actions">
                 {% if user.is_authenticated %}
-                    <span class="text-sm">{{ user.get_username }}</span>
-                    <a href="{% url 'accounts:logout' %}" class="text-blue-600">Logout</a>
+                    <a href="{% url 'accounts:profile_detail' %}" class="btn btn-ghost">Профиль</a>
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-outline">Выйти</a>
                 {% else %}
-                    <a href="{% url 'accounts:login' %}" class="text-blue-600">Login</a>
-                    <a href="{% url 'accounts:register' %}" class="text-blue-600">Register</a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Войти</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary">Регистрация</a>
                 {% endif %}
             </div>
         </div>
     </nav>
-    <main class="container mx-auto px-4 py-8">
+    <main class="container page">
         {% block content %}{% endblock %}
     </main>
+    <footer class="footer">
+        <div class="container">© {{ now|date:'Y' }} SkillSwap — студенческий обмен знаниями</div>
+    </footer>
 </body>
 </html>
 
