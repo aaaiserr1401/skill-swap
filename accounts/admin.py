@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
-from .models import User, Skill
+from .models import User, Skill, ExchangeRequest
 
 
 @admin.register(User)
@@ -31,7 +31,7 @@ class UserAdmin(DjangoUserAdmin):
             },
         ),
     )
-    list_display = ("username", "email", "full_name", "university", "is_staff")
+    list_display = ("username", "email", "full_name", "university", "points", "is_staff")
     search_fields = ("username", "email", "full_name", "university")
 
 
@@ -39,5 +39,12 @@ class UserAdmin(DjangoUserAdmin):
 class SkillAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
+
+
+@admin.register(ExchangeRequest)
+class ExchangeRequestAdmin(admin.ModelAdmin):
+    list_display = ("sender", "receiver", "skill", "status", "sender_confirmed", "receiver_confirmed", "created_at")
+    list_filter = ("status", "created_at")
+    search_fields = ("sender__username", "receiver__username", "skill__name")
 
 # Register your models here.

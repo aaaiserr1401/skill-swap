@@ -3,6 +3,8 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from .models import ExchangeRequest
 from .forms import RegisterForm, LoginForm, ProfileForm
 
 
@@ -38,5 +40,17 @@ def profile_edit(request):
     else:
         form = ProfileForm(instance=request.user)
     return render(request, 'accounts/profile_edit.html', {'form': form})
+
+
+@login_required
+def profile_detail(request):
+    # Skeleton history: last 10 exchanges related to the user
+    recent_exchanges = ExchangeRequest.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).select_related('sender', 'receiver', 'skill')[:10]
+    return render(request, 'accounts/profile_detail.html', {
+        'user_obj': request.user,
+        'recent_exchanges': recent_exchanges,
+    })
 
 # Create your views here.
