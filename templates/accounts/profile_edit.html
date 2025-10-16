@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile · SkillSwap{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+  <h1 class="text-xl font-semibold mb-4">Edit profile</h1>
+  <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% csrf_token %}
+    <div class="space-y-3">
+      <div>
+        <label class="block text-sm">Full name</label>
+        {{ form.full_name }}
+      </div>
+      <div>
+        <label class="block text-sm">University</label>
+        {{ form.university }}
+      </div>
+      <div>
+        <label class="block text-sm">Avatar</label>
+        {{ form.avatar }}
+      </div>
+      <div>
+        <img id="avatarPreview" src="{% if user.avatar %}{{ user.avatar.url }}{% endif %}" class="h-24 w-24 rounded-full object-cover border" alt="avatar preview" />
+      </div>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-sm">Могу преподавать</label>
+        {{ form.skills_can_teach }}
+      </div>
+      <div>
+        <label class="block text-sm">Хочу изучить</label>
+        {{ form.skills_to_learn }}
+      </div>
+    </div>
+    <div class="md:col-span-2">
+      {% if form.errors %}
+        <div class="text-red-600 text-sm mb-2">{{ form.errors }}</div>
+      {% endif %}
+      <button class="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+      <a href="{% url 'home' %}" class="ml-3 text-blue-600">Cancel</a>
+    </div>
+  </form>
+</div>
+<script>
+  const input = document.querySelector('input[type="file"][name="avatar"]');
+  const preview = document.getElementById('avatarPreview');
+  if (input) {
+    input.addEventListener('change', (e) => {
+      const [file] = input.files;
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+      }
+    });
+  }
+</script>
+{% endblock %}
+
+
