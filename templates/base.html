@@ -17,6 +17,10 @@
             <a href="/" class="brand">SkillSwap</a>
             <div class="nav-actions">
                 {% if user.is_authenticated %}
+                    <div class="points-display">
+                        <span class="points-label">Баллы:</span>
+                        <span class="points-value">{{ user.points }}</span>
+                    </div>
                     <a href="{% url 'accounts:profile_detail' %}" class="btn btn-ghost">Профиль</a>
                     <a href="{% url 'accounts:exchange_list' %}" class="btn btn-ghost">Обмены</a>
                     <a href="{% url 'accounts:inbox_requests' %}" class="btn btn-ghost">Входящие</a>
