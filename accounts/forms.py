@@ -12,6 +12,18 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ("username", "email", "full_name", "university", "avatar", "password1", "password2")
 
+    def save(self, commit: bool = True) -> User:
+        user: User = super().save(commit=False)
+        user.email = self.cleaned_data.get("email")
+        user.full_name = self.cleaned_data.get("full_name")
+        user.university = self.cleaned_data.get("university")
+        avatar = self.cleaned_data.get("avatar")
+        if avatar:
+            user.avatar = avatar
+        if commit:
+            user.save()
+        return user
+
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField()
@@ -46,4 +58,13 @@ class ExchangeCreateForm(forms.ModelForm):
     class Meta:
         model = ExchangeRequest
         fields = ("receiver", "skill")
+
+
+class ExchangeSendForm(forms.ModelForm):
+    skill = forms.ModelChoiceField(queryset=Skill.objects.all())
+    message = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
+
+    class Meta:
+        model = ExchangeRequest
+        fields = ("skill", "message")
 

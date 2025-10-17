@@ -9,9 +9,19 @@
       <p class="mt-3 muted">🎓 У каждого есть сильные стороны: математика, английский, программирование — делись тем, что умеешь.</p>
       <p class="mt-2 muted">👉 Простая логика: профиль + поиск + чат + баллы.</p>
       <div class="hero-cta">
-        <a href="{% url 'accounts:register' %}" class="btn btn-primary">Начать бесплатно</a>
-        <a href="#how" class="btn btn-outline">Как это работает</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:exchange_list' %}" class="btn btn-primary">Начать обмениваться</a>
+          <a href="{% url 'skill_list' %}" class="btn btn-outline">Найти навык</a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary">Начать бесплатно</a>
+          <a href="#how" class="btn btn-outline">Как это работает</a>
+        {% endif %}
       </div>
+      {% if user.is_authenticated %}
+        <div style="margin-top:.6rem;">
+          <span class="badge badge-info">Ваши баллы: {{ user.points }}</span>
+        </div>
+      {% endif %}
     </div>
     <div class="card-hero">
       <p class="muted">«Профиль: что могу / что хочу изучить. Поиск по навыкам. Баллы за помощь → тратишь их на обучение у других.»</p>
@@ -41,13 +51,18 @@
   <section class="section">
     <div class="card flex items-center justify-between" style="gap:1rem; flex-wrap:wrap;">
       <div>
-        <h3 class="text-xl font-semibold mb-1">Готов начать?</h3>
-        <p class="muted">Регистрация занимает меньше минуты.</p>
+        {% if user.is_authenticated %}
+          <h3 class="text-xl font-semibold mb-1">Готов обмениваться?</h3>
+          <p class="muted">Создавайте запросы, подтверждайте сессии и накапливайте баллы.</p>
+        {% else %}
+          <h3 class="text-xl font-semibold mb-1">Готов начать?</h3>
+          <p class="muted">Регистрация занимает меньше минуты.</p>
+        {% endif %}
       </div>
       <div class="hero-cta">
         {% if user.is_authenticated %}
-          <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Мой профиль</a>
-          <a href="{% url 'accounts:logout' %}" class="btn btn-outline">Выйти</a>
+          <a href="{% url 'accounts:exchange_list' %}" class="btn btn-primary">К обменам</a>
+          <a href="{% url 'accounts:inbox_requests' %}" class="btn btn-outline">Входящие</a>
         {% else %}
           <a href="{% url 'accounts:register' %}" class="btn btn-primary">Зарегистрироваться</a>
           <a href="{% url 'accounts:login' %}" class="btn btn-outline">Войти</a>

@@ -4,8 +4,9 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.db import transaction
 from .models import ExchangeRequest
-from .forms import RegisterForm, LoginForm, ProfileForm, ExchangeCreateForm
+from .forms import RegisterForm, LoginForm, ProfileForm, ExchangeCreateForm, ExchangeSendForm
 
 
 class UserLoginView(LoginView):
@@ -68,11 +69,58 @@ def exchange_create(request):
             ex: ExchangeRequest = form.save(commit=False)
             ex.sender = request.user
             ex.status = ExchangeRequest.STATUS_PENDING
-            ex.save()
-            return redirect('exchange_list')
+            ex.price = 5
+            # atomic hold of points
+            with transaction.atomic():
+                user_locked = request.user.__class__.objects.select_for_update().get(pk=request.user.pk)
+                if user_locked.points < ex.price:
+                    form.add_error(None, 'Недостаточно баллов для отправки запроса')
+                else:
+                    user_locked.points = user_locked.points - ex.price
+                    user_locked.points_hold = user_locked.points_hold + ex.price
+                    user_locked.save(update_fields=['points', 'points_hold'])
+                    ex.save()
+                    return redirect('accounts:exchange_list')
     else:
         form = ExchangeCreateForm()
     return render(request, 'exchanges/create.html', { 'form': form })
+
+
+@login_required
+def user_detail(request, user_id: int):
+    target = get_object_or_404(request.user.__class__, pk=user_id)
+    # Show send-request card
+    form = ExchangeSendForm()
+    return render(request, 'accounts/user_detail.html', {
+        'target': target,
+        'form': form,
+    })
+
+
+@login_required
+def send_request(request, user_id: int):
+    target = get_object_or_404(request.user.__class__, pk=user_id)
+    if request.method == 'POST':
+        form = ExchangeSendForm(request.POST)
+        if form.is_valid():
+            ex: ExchangeRequest = form.save(commit=False)
+            ex.sender = request.user
+            ex.receiver = target
+            # basic pricing: 1 балл
+            ex.price = 1
+            # balance check
+            if request.user.points < ex.price:
+                form.add_error(None, 'Недостаточно баллов')
+            else:
+                ex.status = ExchangeRequest.STATUS_PENDING
+                ex.save()
+                return redirect('accounts:exchange_list')
+    else:
+        form = ExchangeSendForm()
+    return render(request, 'accounts/user_detail.html', {
+        'target': target,
+        'form': form,
+    })
 
 
 @login_required
@@ -81,16 +129,29 @@ def exchange_accept(request, pk: int):
         ex = get_object_or_404(ExchangeRequest, pk=pk, receiver=request.user)
         ex.status = ExchangeRequest.STATUS_ACCEPTED
         ex.save(update_fields=['status'])
-    return redirect('exchange_list')
+    return redirect('accounts:exchange_list')
 
 
 @login_required
 def exchange_decline(request, pk: int):
     if request.method == 'POST':
         ex = get_object_or_404(ExchangeRequest, pk=pk, receiver=request.user)
-        ex.status = ExchangeRequest.STATUS_DECLINED
-        ex.save(update_fields=['status'])
-    return redirect('exchange_list')
+        # refund hold to sender
+        with transaction.atomic():
+            sender_locked = ex.sender.__class__.objects.select_for_update().get(pk=ex.sender_id)
+            sender_locked.points_hold = sender_locked.points_hold - ex.price
+            sender_locked.points = sender_locked.points + ex.price
+            sender_locked.save(update_fields=['points_hold', 'points'])
+            ex.status = ExchangeRequest.STATUS_DECLINED
+            ex.save(update_fields=['status'])
+    return redirect('accounts:exchange_list')
+
+
+@login_required
+def inbox_requests(request):
+    # Incoming are those where current user is receiver and status is pending
+    incoming = ExchangeRequest.objects.filter(receiver=request.user, status=ExchangeRequest.STATUS_PENDING).select_related('sender', 'skill')
+    return render(request, 'exchanges/inbox.html', { 'incoming': incoming })
 
 
 @login_required
@@ -99,10 +160,20 @@ def exchange_confirm(request, pk: int):
         ex = get_object_or_404(ExchangeRequest, pk=pk)
         if ex.sender == request.user:
             ex.sender_confirmed = True
+            from django.utils import timezone
+            ex.sender_confirmed_at = timezone.now()
         if ex.receiver == request.user:
             ex.receiver_confirmed = True
-        ex.save(update_fields=['sender_confirmed', 'receiver_confirmed'])
+            from django.utils import timezone
+            ex.receiver_confirmed_at = timezone.now()
+        ex.save(update_fields=['sender_confirmed', 'receiver_confirmed', 'sender_confirmed_at', 'receiver_confirmed_at'])
         ex.try_complete()
-    return redirect('exchange_list')
+    return redirect('accounts:exchange_list')
+
+
+@login_required
+def exchange_detail(request, pk: int):
+    ex = get_object_or_404(ExchangeRequest.objects.select_related('sender', 'receiver', 'skill'), pk=pk)
+    return render(request, 'exchanges/detail.html', { 'ex': ex })
 
 # Create your views here.

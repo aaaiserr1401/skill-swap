@@ -6,6 +6,9 @@ from django.utils.text import slugify
 class Skill(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='skill_photos/', null=True, blank=True)
+    experience_years = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -29,7 +32,8 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255, blank=True)
     university = models.CharField(max_length=255, blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    points = models.IntegerField(default=0)
+    points = models.IntegerField(default=20)
+    points_hold = models.IntegerField(default=0)
     skills_can_teach = models.ManyToManyField(Skill, related_name='teachers', blank=True)
     skills_to_learn = models.ManyToManyField(Skill, related_name='learners', blank=True)
 
@@ -55,9 +59,13 @@ class ExchangeRequest(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_exchanges')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_exchanges')
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    message = models.TextField(blank=True)
+    price = models.PositiveIntegerField(default=1)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     sender_confirmed = models.BooleanField(default=False)
     receiver_confirmed = models.BooleanField(default=False)
+    sender_confirmed_at = models.DateTimeField(null=True, blank=True)
+    receiver_confirmed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -73,13 +81,23 @@ class ExchangeRequest(models.Model):
         if self.status == self.STATUS_COMPLETED:
             return False
         if self.sender_confirmed and self.receiver_confirmed and self.status in {self.STATUS_ACCEPTED, self.STATUS_PENDING}:
-            self.status = self.STATUS_COMPLETED
-            # Grant minimal points to both users
-            self.sender.points = (self.sender.points or 0) + 1
-            self.receiver.points = (self.receiver.points or 0) + 1
-            self.sender.save(update_fields=['points'])
-            self.receiver.save(update_fields=['points'])
-            self.save(update_fields=['status'])
+            # Finalize transaction: move hold from sender to receiver and give bonus +1 to both
+            from django.db import transaction
+            from django.db.models import F
+            with transaction.atomic():
+                # reload users with select_for_update to avoid races
+                sender_locked = User.objects.select_for_update().get(pk=self.sender_id)
+                receiver_locked = User.objects.select_for_update().get(pk=self.receiver_id)
+                # Ensure hold covers price
+                hold_to_release = min(max(sender_locked.points_hold, 0), max(self.price, 0))
+                # Deduct hold and points from sender; credit receiver
+                sender_locked.points_hold = F('points_hold') - hold_to_release
+                sender_locked.points = F('points') - hold_to_release + 10
+                receiver_locked.points = F('points') + hold_to_release + 10
+                sender_locked.save(update_fields=['points_hold', 'points'])
+                receiver_locked.save(update_fields=['points'])
+                self.status = self.STATUS_COMPLETED
+                self.save(update_fields=['status'])
             return True
         return False
 

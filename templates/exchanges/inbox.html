@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Входящие запросы · SkillSwap{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h1 class="text-xl font-semibold">Входящие запросы</h1>
+    <div style="margin-top:1rem;display:grid;gap:.6rem;">
+      {% for ex in incoming %}
+        <div class="feature" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div class="muted">
+            От <a href="{% url 'accounts:user_detail' ex.sender.id %}" style="color:#fff;font-weight:600;">{{ ex.sender }}</a>
+            — навык <span style="color:#fff;font-weight:600;">{{ ex.skill.name }}</span>
+            <span class="badge badge-warn">pending</span>
+            {% if ex.message %}<div class="muted" style="margin-top:.2rem;">Сообщение: {{ ex.message }}</div>{% endif %}
+            <div class="muted">Цена: <strong style="color:#fff">{{ ex.price }}</strong> балл(ов)</div>
+          </div>
+          <div class="form-actions">
+            <form method="post" action="{% url 'accounts:exchange_accept' ex.pk %}">{% csrf_token %}<button class="btn btn-primary">Accept</button></form>
+            <form method="post" action="{% url 'accounts:exchange_decline' ex.pk %}">{% csrf_token %}<button class="btn btn-outline">Decline</button></form>
+          </div>
+        </div>
+      {% empty %}
+        <div class="muted">Нет входящих запросов</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
