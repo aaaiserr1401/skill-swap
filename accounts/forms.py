@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import User, Skill
+from .models import User, Skill, ExchangeRequest
 
 
 class RegisterForm(UserCreationForm):
@@ -37,4 +37,13 @@ class ProfileForm(forms.ModelForm):
         if (not teach or teach.count() == 0) and (not learn or learn.count() == 0):
             raise forms.ValidationError("Укажите минимум 1 навык в одном из списков.")
         return cleaned
+
+
+class ExchangeCreateForm(forms.ModelForm):
+    receiver = forms.ModelChoiceField(queryset=User.objects.all())
+    skill = forms.ModelChoiceField(queryset=Skill.objects.all())
+
+    class Meta:
+        model = ExchangeRequest
+        fields = ("receiver", "skill")
 

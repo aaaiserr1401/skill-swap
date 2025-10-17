@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Обмены · SkillSwap{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <h1 class="text-xl font-semibold">Мои обмены</h1>
+      <a class="btn btn-primary" href="{% url 'exchange_create' %}">Создать запрос</a>
+    </div>
+    <div style="margin-top:1rem;display:grid;gap:.6rem;">
+      {% for ex in items %}
+        <div class="feature" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div class="muted">
+            <span style="color:#fff;font-weight:600;">{{ ex.skill.name }}</span>
+            — {{ ex.sender }} ↔ {{ ex.receiver }}
+            <span class="btn btn-outline" style="padding:.1rem .5rem;border-radius:999px;">{{ ex.status }}</span>
+          </div>
+          <div class="form-actions">
+            {% if user == ex.receiver and ex.status == 'pending' %}
+              <form method="post" action="{% url 'exchange_accept' ex.pk %}">{% csrf_token %}<button class="btn btn-primary">Принять</button></form>
+              <form method="post" action="{% url 'exchange_decline' ex.pk %}">{% csrf_token %}<button class="btn btn-outline">Отклонить</button></form>
+            {% endif %}
+            {% if user == ex.sender or user == ex.receiver %}
+              {% if ex.status in 'accepted pending' %}
+                <form method="post" action="{% url 'exchange_confirm' ex.pk %}">{% csrf_token %}<button class="btn btn-ghost">Подтвердить</button></form>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="muted">Пока нет обменов</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

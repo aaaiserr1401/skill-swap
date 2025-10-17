@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Навыки · SkillSwap{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <h1 class="text-xl font-semibold mb-4">Навыки</h1>
+    <ul style="display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+      {% for s in skills %}
+        <li class="feature">
+          <a href="{% url 'skill_detail' slug=s.slug %}" style="display:block;">{{ s.name }}</a>
+        </li>
+      {% empty %}
+        <li class="muted">Пока нет навыков</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+
+

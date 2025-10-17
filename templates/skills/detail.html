@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{{ skill.name }} · SkillSwap{% endblock %}
+{% block content %}
+<div class="container" style="max-width:860px;">
+  <div class="card">
+    <h1 class="text-xl font-semibold mb-2">{{ skill.name }}</h1>
+    <p class="muted">Могут преподавать: <strong style="color:#fff;">{{ can_teach_count }}</strong></p>
+    <p class="muted">Хотят изучить: <strong style="color:#fff;">{{ to_learn_count }}</strong></p>
+    <div class="form-actions" style="margin-top:1rem;">
+      <a href="{% url 'skill_list' %}" class="btn btn-ghost">← Ко всем навыкам</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
