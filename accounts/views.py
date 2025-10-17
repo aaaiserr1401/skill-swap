@@ -5,7 +5,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.db import transaction
-from .models import ExchangeRequest
+from django.core.paginator import Paginator
+from .models import ExchangeRequest, User
 from .forms import RegisterForm, LoginForm, ProfileForm, ExchangeCreateForm, ExchangeSendForm
 
 
@@ -106,15 +107,19 @@ def send_request(request, user_id: int):
             ex: ExchangeRequest = form.save(commit=False)
             ex.sender = request.user
             ex.receiver = target
-            # basic pricing: 1 балл
-            ex.price = 1
-            # balance check
-            if request.user.points < ex.price:
-                form.add_error(None, 'Недостаточно баллов')
-            else:
-                ex.status = ExchangeRequest.STATUS_PENDING
-                ex.save()
-                return redirect('accounts:exchange_list')
+            ex.price = 5  # Fixed price for request
+            # atomic hold of points
+            with transaction.atomic():
+                user_locked = request.user.__class__.objects.select_for_update().get(pk=request.user.pk)
+                if user_locked.points < ex.price:
+                    form.add_error(None, 'Недостаточно баллов')
+                else:
+                    user_locked.points = user_locked.points - ex.price
+                    user_locked.points_hold = user_locked.points_hold + ex.price
+                    user_locked.save(update_fields=['points', 'points_hold'])
+                    ex.status = ExchangeRequest.STATUS_PENDING
+                    ex.save()
+                    return redirect('accounts:exchange_list')
     else:
         form = ExchangeSendForm()
     return render(request, 'accounts/user_detail.html', {
@@ -176,4 +181,29 @@ def exchange_detail(request, pk: int):
     ex = get_object_or_404(ExchangeRequest.objects.select_related('sender', 'receiver', 'skill'), pk=pk)
     return render(request, 'exchanges/detail.html', { 'ex': ex })
 
-# Create your views here.
+
+@login_required
+def user_search(request):
+    search_query = request.GET.get('q', '')
+    users = User.objects.all()
+    
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(full_name__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query)
+        )
+    
+    # Exclude current user from results
+    users = users.exclude(id=request.user.id).order_by('username')
+    
+    # Pagination
+    paginator = Paginator(users, 12)  # 12 users per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'accounts/user_search.html', {
+        'users': page_obj,
+        'search_query': search_query,
+    })

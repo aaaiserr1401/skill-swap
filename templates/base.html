@@ -22,6 +22,7 @@
                         <span class="points-value">{{ user.points }}</span>
                     </div>
                     <a href="{% url 'accounts:profile_detail' %}" class="btn btn-ghost">Профиль</a>
+                    <a href="{% url 'accounts:user_search' %}" class="btn btn-ghost">Найти пользователей</a>
                     <a href="{% url 'accounts:exchange_list' %}" class="btn btn-ghost">Обмены</a>
                     <a href="{% url 'accounts:inbox_requests' %}" class="btn btn-ghost">Входящие</a>
                     <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
