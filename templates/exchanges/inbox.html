@@ -3,7 +3,13 @@
 {% block content %}
 <div class="container">
   <div class="card">
-    <h1 class="text-xl font-semibold">Входящие запросы</h1>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <h1 class="text-xl font-semibold">Входящие запросы</h1>
+      <div style="display:flex;gap:.5rem;">
+        <a class="btn btn-ghost" href="?sort=-created_at">Новые</a>
+        <a class="btn btn-ghost" href="?sort=created_at">Старые</a>
+      </div>
+    </div>
     <div style="margin-top:1rem;display:grid;gap:.6rem;">
       {% for ex in incoming %}
         <div class="feature" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
@@ -23,6 +29,17 @@
         <div class="muted">Нет входящих запросов</div>
       {% endfor %}
     </div>
+    {% if incoming.has_other_pages %}
+      <div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem;">
+        {% if incoming.has_previous %}
+          <a class="btn btn-ghost" href="?page={{ incoming.previous_page_number }}&sort={{ sort }}">Назад</a>
+        {% endif %}
+        <span class="muted">Стр. {{ incoming.number }} из {{ incoming.paginator.num_pages }}</span>
+        {% if incoming.has_next %}
+          <a class="btn btn-ghost" href="?page={{ incoming.next_page_number }}&sort={{ sort }}">Вперед</a>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

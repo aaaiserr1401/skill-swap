@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from .models import User, Skill, ExchangeRequest
+from rest_framework.authtoken.models import Token
 
 
 @admin.register(User)
@@ -47,4 +48,7 @@ class ExchangeRequestAdmin(admin.ModelAdmin):
     list_filter = ("status", "created_at")
     search_fields = ("sender__username", "receiver__username", "skill__name")
 
-# Register your models here.
+@admin.register(Token)
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ("key", "user", "created")
+    search_fields = ("key", "user__username", "user__email")

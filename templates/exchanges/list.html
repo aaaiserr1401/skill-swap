@@ -10,6 +10,15 @@
         <a class="btn btn-primary" href="{% url 'accounts:exchange_create' %}">Создать запрос</a>
       </div>
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:.5rem;flex-wrap:wrap;">
+      <div class="muted">Сортировка:</div>
+      <div style="display:flex;gap:.5rem;">
+        <a class="btn btn-ghost" href="?sort=-created_at">Новые</a>
+        <a class="btn btn-ghost" href="?sort=created_at">Старые</a>
+        <a class="btn btn-ghost" href="?sort=status">Статус A→Z</a>
+        <a class="btn btn-ghost" href="?sort=-status">Статус Z→A</a>
+      </div>
+    </div>
     <div style="margin-top:1rem;display:grid;gap:.6rem;">
       {% for ex in items %}
         <div class="feature" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
@@ -37,6 +46,17 @@
         <div class="muted">Пока нет обменов</div>
       {% endfor %}
     </div>
+    {% if items.has_other_pages %}
+      <div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem;">
+        {% if items.has_previous %}
+          <a class="btn btn-ghost" href="?page={{ items.previous_page_number }}&sort={{ sort }}">Назад</a>
+        {% endif %}
+        <span class="muted">Стр. {{ items.number }} из {{ items.paginator.num_pages }}</span>
+        {% if items.has_next %}
+          <a class="btn btn-ghost" href="?page={{ items.next_page_number }}&sort={{ sort }}">Вперед</a>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

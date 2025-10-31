@@ -58,8 +58,17 @@ def profile_detail(request):
 
 @login_required
 def exchange_list(request):
-    items = ExchangeRequest.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).select_related('sender', 'receiver', 'skill')
-    return render(request, 'exchanges/list.html', { 'items': items })
+    sort = request.GET.get('sort', '-created_at')
+    allowed_sorts = ['created_at', '-created_at', 'status', '-status']
+    if sort not in allowed_sorts:
+        sort = '-created_at'
+    qs = ExchangeRequest.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).select_related('sender', 'receiver', 'skill').order_by(sort)
+    paginator = Paginator(qs, 10)
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
+    return render(request, 'exchanges/list.html', { 'items': page_obj, 'sort': sort })
 
 
 @login_required
@@ -104,6 +113,10 @@ def send_request(request, user_id: int):
     if request.method == 'POST':
         form = ExchangeSendForm(request.POST)
         if form.is_valid():
+            # validation: cannot send to self
+            if target == request.user:
+                form.add_error(None, 'Нельзя отправить запрос самому себе')
+                return render(request, 'accounts/user_detail.html', { 'target': target, 'form': form })
             ex: ExchangeRequest = form.save(commit=False)
             ex.sender = request.user
             ex.receiver = target
@@ -155,8 +168,18 @@ def exchange_decline(request, pk: int):
 @login_required
 def inbox_requests(request):
     # Incoming are those where current user is receiver and status is pending
-    incoming = ExchangeRequest.objects.filter(receiver=request.user, status=ExchangeRequest.STATUS_PENDING).select_related('sender', 'skill')
-    return render(request, 'exchanges/inbox.html', { 'incoming': incoming })
+    sort = request.GET.get('sort', '-created_at')
+    allowed_sorts = ['created_at', '-created_at']
+    if sort not in allowed_sorts:
+        sort = '-created_at'
+    qs = ExchangeRequest.objects.filter(
+        receiver=request.user,
+        status=ExchangeRequest.STATUS_PENDING
+    ).select_related('sender', 'skill').order_by(sort)
+    paginator = Paginator(qs, 10)
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
+    return render(request, 'exchanges/inbox.html', { 'incoming': page_obj, 'sort': sort })
 
 
 @login_required
@@ -185,6 +208,7 @@ def exchange_detail(request, pk: int):
 @login_required
 def user_search(request):
     search_query = request.GET.get('q', '')
+    sort = request.GET.get('sort', 'username')
     users = User.objects.all()
     
     if search_query:
@@ -195,8 +219,11 @@ def user_search(request):
             Q(last_name__icontains=search_query)
         )
     
-    # Exclude current user from results
-    users = users.exclude(id=request.user.id).order_by('username')
+    # Exclude current user from results and sort
+    allowed_sorts = ['username', '-username', 'date_joined', '-date_joined']
+    if sort not in allowed_sorts:
+        sort = 'username'
+    users = users.exclude(id=request.user.id).order_by(sort)
     
     # Pagination
     paginator = Paginator(users, 12)  # 12 users per page
@@ -206,4 +233,5 @@ def user_search(request):
     return render(request, 'accounts/user_search.html', {
         'users': page_obj,
         'search_query': search_query,
+        'sort': sort,
     })

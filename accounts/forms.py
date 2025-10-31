@@ -59,6 +59,15 @@ class ExchangeCreateForm(forms.ModelForm):
         model = ExchangeRequest
         fields = ("receiver", "skill")
 
+    def clean(self):
+        cleaned = super().clean()
+        receiver = cleaned.get('receiver')
+        if self.instance and hasattr(self, 'request'):
+            # If request attached externally, ensure no self-target
+            if receiver == self.request.user:
+                raise forms.ValidationError('Нельзя отправить запрос самому себе')
+        return cleaned
+
 
 class ExchangeSendForm(forms.ModelForm):
     skill = forms.ModelChoiceField(queryset=Skill.objects.all())
@@ -67,4 +76,8 @@ class ExchangeSendForm(forms.ModelForm):
     class Meta:
         model = ExchangeRequest
         fields = ("skill", "message")
+
+    def clean(self):
+        cleaned = super().clean()
+        return cleaned
 
