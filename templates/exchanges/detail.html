@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Запрос #{{ ex.id }} · SkillSwap{% endblock %}
+{% block content %}
+<div class="container" style="max-width:860px;">
+  <div class="card">
+    <h1 class="text-xl font-semibold">Запрос #{{ ex.id }}</h1>
+    <p class="muted">От: <strong style="color:#fff;">{{ ex.sender }}</strong> → Кому: <strong style="color:#fff;">{{ ex.receiver }}</strong></p>
+    <p class="muted">Навык: <strong style="color:#fff;">{{ ex.skill.name }}</strong></p>
+    <p class="muted">Статус: 
+      {% if ex.status == 'pending' %}<span class="badge badge-warn">pending</span>{% endif %}
+      {% if ex.status == 'accepted' %}<span class="badge badge-success">accepted</span>{% endif %}
+      {% if ex.status == 'declined' %}<span class="badge badge-danger">declined</span>{% endif %}
+      {% if ex.status == 'completed' %}<span class="badge badge-info">completed</span>{% endif %}
+    </p>
+    {% if ex.message %}<p class="muted">Сообщение: {{ ex.message }}</p>{% endif %}
+    <p class="muted">Цена: <strong style="color:#fff;">{{ ex.price }}</strong> балл(ов)</p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+      <div class="feature">
+        <div>Подтверждение отправителя: {% if ex.sender_confirmed %}✅{% else %}—{% endif %}</div>
+        {% if ex.sender_confirmed_at %}<div class="muted">{{ ex.sender_confirmed_at }}</div>{% endif %}
+        {% if user == ex.sender and ex.status != 'completed' %}
+          <form method="post" action="{% url 'accounts:exchange_confirm' ex.pk %}">{% csrf_token %}<button class="btn btn-primary">Confirm session</button></form>
+        {% endif %}
+      </div>
+      <div class="feature">
+        <div>Подтверждение получателя: {% if ex.receiver_confirmed %}✅{% else %}—{% endif %}</div>
+        {% if ex.receiver_confirmed_at %}<div class="muted">{{ ex.receiver_confirmed_at }}</div>{% endif %}
+        {% if user == ex.receiver and ex.status != 'completed' %}
+          <form method="post" action="{% url 'accounts:exchange_confirm' ex.pk %}">{% csrf_token %}<button class="btn btn-primary">Confirm session</button></form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

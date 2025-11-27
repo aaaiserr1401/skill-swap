@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}My Profile · SkillSwap{% endblock %}
+{% block content %}
+<div class="container" style="max-width:940px;">
+  <div class="card">
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <img src="{% if user_obj.avatar %}{{ user_obj.avatar.url }}{% endif %}" style="height:64px;width:64px;border-radius:999px;object-fit:cover;border:1px solid var(--outline);" alt="avatar" />
+      <div>
+        <h1 class="text-xl font-semibold">{{ user_obj.get_full_name|default:user_obj.username }}</h1>
+        <p class="muted">Баллы: <span style="color:#fff;font-weight:600;">{{ user_obj.points }}</span></p>
+        <a class="btn btn-ghost" href="{% url 'accounts:profile_edit' %}">Редактировать профиль</a>
+      </div>
+    </div>
+    <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+      <a class="btn btn-outline" href="#info">Профиль</a>
+      <a class="btn btn-outline" href="{% url 'skill_list' %}">Навыки</a>
+      <a class="btn btn-outline" href="{% url 'accounts:exchange_list' %}">Обмены</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <a id="info"></a>
+    <h2 class="font-semibold mb-2">История обменов (скелет)</h2>
+    <ul style="display:grid;gap:.5rem;">
+      {% for ex in recent_exchanges %}
+        <li class="muted">
+          <span style="color:#fff;font-weight:600;">{{ ex.skill.name }}</span> — {{ ex.sender }} ↔ {{ ex.receiver }}
+          <span class="btn btn-outline" style="padding:.1rem .5rem;border-radius:999px;">{{ ex.status }}</span>
+        </li>
+      {% empty %}
+        <li class="muted">Пока нет операций</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <a id="skills"></a>
+    <h2 class="font-semibold mb-2">Навыки</h2>
+    <div style="display:grid;grid-template-columns:1fr;gap:1rem;">
+      <div>
+        <h3 class="muted" style="margin-bottom:.4rem;">Могу преподавать</h3>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+          {% for s in user_obj.skills_can_teach.all %}
+            <span class="badge badge-info">{{ s.name }}</span>
+          {% empty %}
+            <span class="muted">—</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3 class="muted" style="margin-bottom:.4rem;">Хочу изучить</h3>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+          {% for s in user_obj.skills_to_learn.all %}
+            <span class="badge badge-warn">{{ s.name }}</span>
+          {% empty %}
+            <span class="muted">—</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:.8rem;">
+      <a class="btn btn-ghost" href="{% url 'skill_list' %}">Посмотреть все навыки</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
