@@ -26,14 +26,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-3svt##natv5^$h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-raw_allowed_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS')
-if raw_allowed_hosts:
-    ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split(',') if h.strip()]
-else:
-    ALLOWED_HOSTS = [
-        '127.0.0.1',
-        'localhost',
-    ]
+# Разрешаем все хосты для простоты развертывания
+# В продакшене лучше указать конкретные домены
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
