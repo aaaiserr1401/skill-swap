@@ -1,0 +1,27 @@
+# Файл конфигурации для деплоя на Render
+# Документация: https://render.com/docs/deploy-django
+
+services:
+  - type: web
+    name: skill-swap
+    env: python
+    buildCommand: "chmod a+x build.sh && ./build.sh"
+    startCommand: "gunicorn skillswap.wsgi:application --log-file -"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: skillswap.settings
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DISABLE_COLLECTSTATIC
+        value: "0"
+    plan: free
+    numInstances: 1
+    healthCheckPath: /  # URL для проверки здоровья приложения
