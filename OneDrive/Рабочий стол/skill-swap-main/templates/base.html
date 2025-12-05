@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}SkillSwap{% endblock %}</title>
+    {% load static %}
+    <!-- Optional Tailwind for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom modern theme -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block head %}{% endblock %}
+</head>
+<body class="theme min-h-screen flex flex-col">
+    <nav class="navbar">
+        <div class="container nav-inner">
+            <a href="/" class="brand">
+                <img src="{% static 'img/logo-skillswap.png.jpg' %}" alt="SkillSwap" class="brand-logo">
+            </a>
+            <div class="nav-actions">
+                {% if user.is_authenticated %}
+                    <div class="points-display">
+                        <span class="points-label">Баллы:</span>
+                        <span class="points-value">{{ user.points }}</span>
+                    </div>
+                    <a href="{% url 'accounts:profile_detail' %}" class="btn btn-ghost">Профиль</a>
+                    <a href="{% url 'accounts:inbox_requests' %}" class="btn btn-ghost">Уведомления</a>
+                    <a href="{% url 'accounts:user_search' %}" class="btn btn-ghost">Найти пользователей</a>
+                    <a href="{% url 'accounts:exchange_list' %}" class="btn btn-ghost">Обмены</a>
+                    <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline">Выйти</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Войти</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <main class="container page flex-1">
+        {% if messages %}
+          <div class="alerts">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+        <div class="container">© {{ now|date:'Y' }} SkillSwap — студенческий обмен знаниями</div>
+    </footer>
+</body>
+</html>
+
+

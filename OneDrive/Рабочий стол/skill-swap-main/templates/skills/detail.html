@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ skill.name }} · SkillSwap{% endblock %}
+{% block content %}
+<div class="container" style="max-width:860px;">
+  <div class="card">
+    <h1 class="text-xl font-semibold mb-2">{{ skill.name }}</h1>
+    {% if skill.photo %}<img src="{{ skill.photo.url }}" style="max-height:180px;border-radius:.6rem;border:1px solid var(--outline);object-fit:cover;margin-bottom:.6rem;" />{% endif %}
+    {% if skill.description %}<p class="muted" style="margin-bottom:.4rem;">{{ skill.description }}</p>{% endif %}
+    {% if skill.experience_years %}<p class="muted">Рекомендуемый стаж: <strong style="color:#fff">{{ skill.experience_years }}</strong> лет</p>{% endif %}
+    <p class="muted">Могут преподавать: <strong style="color:#fff;">{{ can_teach_count }}</strong></p>
+    <p class="muted">Хотят изучить: <strong style="color:#fff;">{{ to_learn_count }}</strong></p>
+    <div class="form-actions" style="margin-top:1rem;">
+      <a href="{% url 'skill_list' %}" class="btn btn-ghost">← Ко всем навыкам</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+

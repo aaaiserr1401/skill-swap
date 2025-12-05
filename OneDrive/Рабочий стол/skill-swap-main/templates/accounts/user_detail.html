@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{{ target.get_full_name|default:target.username }} · SkillSwap{% endblock %}
+{% block content %}
+<div class="container" style="max-width:860px;">
+  <!-- Верх: основная информация и форма запроса -->
+  <div class="card">
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between;">
+      <div style="display:flex;gap:1rem;align-items:center;">
+        <img src="{% if target.avatar %}{{ target.avatar.url }}{% endif %}" style="height:64px;width:64px;border-radius:999px;object-fit:cover;border:1px solid var(--outline);" alt="avatar" />
+        <div>
+          <h1 class="text-xl font-semibold">{{ target.get_full_name|default:target.username }}</h1>
+          <p class="muted text-sm">@{{ target.username }}</p>
+          <p class="muted">Университет: {{ target.university|default:"—" }}</p>
+        </div>
+      </div>
+      {% if request.user != target %}
+      <div class="card" style="min-width:300px;">
+        <h3 class="font-semibold mb-2">Отправить запрос</h3>
+        <form method="post" action="{% url 'accounts:send_request' target.id %}" class="form-grid">
+          {% csrf_token %}
+          <div class="form-group"><label>Навык</label>{{ form.skill }}</div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Сообщение</label>{{ form.message }}</div>
+          <p class="muted" style="grid-column:1/-1;display:flex;align-items:center;gap:.4rem;">
+            <span>Цена:</span>
+            <span class="badge badge-info" style="font-weight:600;">5 баллов</span>
+          </p>
+          {% if form.errors %}<div class="muted" style="color:#fca5a5;grid-column:1/-1;">{{ form.errors }}</div>{% endif %}
+          <div class="form-actions" style="grid-column:1/-1;">
+            <button class="btn btn-primary">Отправить</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Нижние блоки: навыки -->
+  <div class="grid-3" style="margin-top:1rem;">
+    <div class="card" style="grid-column:1/-1;">
+      <h2 class="text-lg font-semibold mb-2">Может преподавать</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:.35rem;">
+        {% for skill in target.skills_can_teach.all %}
+          <span class="badge badge-info">{{ skill.name }}</span>
+        {% empty %}
+          <p class="muted text-sm">Пока не указал навыки, которые может преподавать.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1;margin-top:1rem;">
+      <h2 class="text-lg font-semibold mb-2">Хочет изучить</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:.35rem;">
+        {% for skill in target.skills_to_learn.all %}
+          <span class="badge badge-warn">{{ skill.name }}</span>
+        {% empty %}
+          <p class="muted text-sm">Пока не указал навыки, которые хочет изучать.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

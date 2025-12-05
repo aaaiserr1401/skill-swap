@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Навыки · SkillSwap{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <h1 class="text-xl font-semibold">Навыки</h1>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'skill_add' %}" class="search" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.name }}
+        {{ form.experience_years }}
+        {{ form.photo }}
+        {{ form.description }}
+        <label style="display:flex;align-items:center;gap:.35rem;" class="muted">{{ form.assign_to_teach }} В "Могу преподавать"</label>
+        <label style="display:flex;align-items:center;gap:.35rem;" class="muted">{{ form.assign_to_learn }} В "Хочу изучить"</label>
+        <button class="btn btn-primary" type="submit">Добавить</button>
+      </form>
+      {% endif %}
+    </div>
+    {% if user.is_authenticated %}
+      <div class="form-grid" style="margin-top:1rem;">
+        <div>
+          <h3 class="muted" style="margin-bottom:.4rem;">Могу преподавать</h3>
+          <ul style="display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+            {% for s in skills_teach %}
+              <li class="feature">{% if s.slug %}<a href="{% url 'skill_detail' slug=s.slug %}">{{ s.name }}</a>{% else %}<span>{{ s.name }}</span>{% endif %}</li>
+            {% empty %}
+              <li class="muted">—</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3 class="muted" style="margin-bottom:.4rem;">Хочу изучить</h3>
+          <ul style="display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+            {% for s in skills_learn %}
+              <li class="feature">{% if s.slug %}<a href="{% url 'skill_detail' slug=s.slug %}">{{ s.name }}</a>{% else %}<span>{{ s.name }}</span>{% endif %}</li>
+            {% empty %}
+              <li class="muted">—</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% else %}
+      <ul style="display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+        {% for s in skills %}
+          <li class="feature">{% if s.slug %}<a href="{% url 'skill_detail' slug=s.slug %}">{{ s.name }}</a>{% else %}<span>{{ s.name }}</span>{% endif %}</li>
+        {% empty %}
+          <li class="muted">Пока нет навыков</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+
+

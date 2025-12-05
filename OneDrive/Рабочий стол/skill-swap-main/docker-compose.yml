@@ -1,0 +1,31 @@
+services:
+  web:
+    build: .
+    command: gunicorn skillswap.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Fallbacks if .env is not set
+      DJANGO_DEBUG: "False"
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: skillswap
+      POSTGRES_USER: skillswap
+      POSTGRES_PASSWORD: skillswap
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

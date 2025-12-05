@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}SkillSwap — обмен знаниями между студентами{% endblock %}
+{% block content %}
+<section class="section hero-section">
+  <div class="hero">
+    <div>
+      <span class="hero-badge">
+        <img src="{% static 'img/logo-skillswap.png.jpg' %}" alt="SkillSwap" class="hero-logo">
+      </span>
+      <h1 class="hero-title mt-3">Обмен знаниями между студентами</h1>
+      <div class="hero-marker"></div>
+      <p class="mt-3 muted">🎓 У каждого есть сильные стороны: математика, английский, программирование — делись тем, что умеешь.</p>
+      <p class="mt-2 muted">👉 Простая логика: профиль + поиск + чат + баллы.</p>
+      <div class="hero-cta">
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:exchange_list' %}" class="btn btn-primary">Начать обмениваться</a>
+          <a href="{% url 'skill_list' %}" class="btn btn-outline">Найти навык</a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary">Начать бесплатно</a>
+          <a href="#how" class="btn btn-outline">Как это работает</a>
+        {% endif %}
+      </div>
+      {% if user.is_authenticated %}
+        <div style="margin-top:.6rem;">
+          <span class="badge badge-info">Ваши баллы: {{ user.points }}</span>
+        </div>
+      {% endif %}
+    </div>
+    <div class="card-hero">
+      <p class="muted">«Профиль: что могу / что хочу изучить. Поиск по навыкам. Баллы за помощь → тратишь их на обучение у других.»</p>
+    </div>
+  </div>
+  </section>
+
+  <section id="features" class="section">
+    <h2 class="text-2xl font-semibold mb-6">Почему это полезно</h2>
+    <div class="grid-3">
+      <div class="feature"><h3>Экономия времени и денег</h3><p>Быстрая помощь от сверстников рядом.</p></div>
+      <div class="feature"><h3>Развитие soft skills</h3><p>Коммуникация, наставничество, объяснение материалов.</p></div>
+      <div class="feature"><h3>Баллы за вклад</h3><p>Помогаешь — получаешь баллы, учишься — тратишь.</p></div>
+    </div>
+  </section>
+
+  <section id="how" class="section">
+    <h2 class="text-2xl font-semibold mb-6">Как это работает</h2>
+    <ol class="list-decimal list-inside space-y-2 muted">
+      <li>Создай профиль: отметь «могу преподавать» и «хочу изучить»</li>
+      <li>Найди студента по нужному навыку</li>
+      <li>Договорись о занятии и обменяйтесь знаниями</li>
+      <li>Подтвердите обмен — оба получаете баллы</li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <div class="card flex items-center justify-between" style="gap:1rem; flex-wrap:wrap;">
+      <div>
+        {% if user.is_authenticated %}
+          <h3 class="text-xl font-semibold mb-1">Готов обмениваться?</h3>
+          <p class="muted">Создавайте запросы, подтверждайте сессии и накапливайте баллы.</p>
+        {% else %}
+          <h3 class="text-xl font-semibold mb-1">Готов начать?</h3>
+          <p class="muted">Регистрация занимает меньше минуты.</p>
+        {% endif %}
+      </div>
+      <div class="hero-cta">
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:exchange_list' %}" class="btn btn-primary">К обменам</a>
+          <a href="{% url 'accounts:inbox_requests' %}" class="btn btn-outline">Входящие</a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary">Зарегистрироваться</a>
+          <a href="{% url 'accounts:login' %}" class="btn btn-outline">Войти</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+

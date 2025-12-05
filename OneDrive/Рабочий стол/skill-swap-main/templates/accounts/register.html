@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Register · SkillSwap{% endblock %}
+{% block content %}
+<div class="container" style="max-width:720px;">
+  <div class="card">
+    <h1 class="text-xl font-semibold mb-4">Создать аккаунт</h1>
+    <form method="post" enctype="multipart/form-data" class="form-grid">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="form-group" style="grid-column:1/-1;color:#fca5a5;">
+          Пожалуйста, исправьте ошибки в форме.
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+      <div class="form-group"><label>Логин</label>{{ form.username }}{% if form.username.errors %}<div style="color:#fca5a5;">{{ form.username.errors }}</div>{% endif %}</div>
+      <div class="form-group"><label>Email</label>{{ form.email }}{% if form.email.errors %}<div style="color:#fca5a5;">{{ form.email.errors }}</div>{% endif %}</div>
+      <div class="form-group"><label>Полное имя</label>{{ form.full_name }}{% if form.full_name.errors %}<div style="color:#fca5a5;">{{ form.full_name.errors }}</div>{% endif %}</div>
+      <div class="form-group"><label>Университет</label>{{ form.university }}{% if form.university.errors %}<div style="color:#fca5a5;">{{ form.university.errors }}</div>{% endif %}</div>
+      <div class="form-group"><label>Аватар</label>{{ form.avatar }}{% if form.avatar.errors %}<div style="color:#fca5a5;">{{ form.avatar.errors }}</div>{% endif %}</div>
+      <div class="form-group"><label>Пароль</label>{{ form.password1 }}{% if form.password1.errors %}<div style="color:#fca5a5;">{{ form.password1.errors }}</div>{% endif %}</div>
+      <div class="form-group"><label>Подтверждение пароля</label>{{ form.password2 }}{% if form.password2.errors %}<div style="color:#fca5a5;">{{ form.password2.errors }}</div>{% endif %}</div>
+      <div class="form-actions">
+        <button class="btn btn-primary">Создать аккаунт</button>
+        <a class="btn btn-ghost" href="{% url 'accounts:login' %}">Войти</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+
