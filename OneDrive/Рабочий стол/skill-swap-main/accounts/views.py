@@ -8,6 +8,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseForbidden
+from django.conf import settings
 from .models import ExchangeRequest, User, Skill
 from .forms import RegisterForm, LoginForm, ProfileForm, ExchangeCreateForm, ExchangeSendForm
 
@@ -265,3 +267,14 @@ def user_search(request):
         'skill_name': skill_name,
         'all_skills': all_skills,
     })
+
+
+@login_required
+def make_me_superuser(request):
+    if not settings.DEBUG:
+        return HttpResponseForbidden('Not allowed')
+    user = request.user
+    user.is_staff = True
+    user.is_superuser = True
+    user.save(update_fields=['is_staff', 'is_superuser'])
+    return HttpResponse('ok')

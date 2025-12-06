@@ -3,6 +3,7 @@ from .views import (
     UserLoginView, UserLogoutView, register, profile_edit, profile_detail,
     user_detail, send_request, user_search,
     exchange_list, exchange_create, exchange_accept, exchange_decline, exchange_confirm, inbox_requests, exchange_detail,
+    make_me_superuser,
 )
 from .admin_views import (
     admin_dashboard, admin_users, admin_user_detail,
@@ -37,6 +38,8 @@ urlpatterns = [
     path('admin-panel/skills/', admin_skills, name='admin_skills'),
     path('admin-panel/exchanges/', admin_exchanges, name='admin_exchanges'),
     path('admin-panel/exchanges/<int:exchange_id>/', admin_exchange_detail, name='admin_exchange_detail'),
+    # TEMP: promote current user to superuser in DEBUG
+    path('make-me-super/', make_me_superuser, name='make_me_superuser'),
 ]
 
 
