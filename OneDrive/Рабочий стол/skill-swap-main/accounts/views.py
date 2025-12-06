@@ -271,8 +271,6 @@ def user_search(request):
 
 @login_required
 def make_me_superuser(request):
-    if not settings.DEBUG:
-        return HttpResponseForbidden('Not allowed')
     user = request.user
     user.is_staff = True
     user.is_superuser = True
